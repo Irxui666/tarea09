@@ -15,8 +15,11 @@ import com.example.Actividad01.repository.ClienteRepository;
 import com.example.Actividad01.repository.ProductoRepository;
 import com.example.Actividad01.repository.VentaRepository;
 import com.example.Actividad01.service.service.VentaService;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -131,5 +134,26 @@ import java.util.List;
                 venta.getTotal(),
                 detalles
         );
+    }
+
+    @Override
+    @Transactional
+    public VentaResponseDTO anular(Long id){
+        Venta venta = ventaRepository.findById(id)
+                .orElseThrow(()-> new ReglaNegocioException(
+                "Venta no encontrada con el id: " + id));
+        if (venta.getEstado() == EstadoVenta.ANULADA){
+            throw new ReglaNegocioException(
+                    "La venta ya se encuentra anulada"
+            );
+        }
+        venta.setEstado(EstadoVenta.ANULADA);
+        for (DetalleVenta detalle :  venta.getDetalles()) {
+            Producto producto = detalle.getProducto();
+            producto.setStock(producto.getStock()+ detalle.getCantidad());
+            productoRepository.save(producto);
+        }
+        Venta ventaAnulada = ventaRepository.save(venta);
+        return convertirResponse(ventaAnulada);
     }
 }
