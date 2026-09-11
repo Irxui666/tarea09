@@ -1,0 +1,11 @@
+package com.example.Actividad01.dto.reporte;
+
+import java.math.BigDecimal;
+
+public record ProductoMasVendidoDTO(
+        Long productoId,
+        String nombreProducto,
+        Long cantidadVendida,
+        BigDecimal montoTotal
+) {
+}
