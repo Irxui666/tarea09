@@ -2,11 +2,15 @@ package com.example.Actividad01.controller;
 
 import com.example.Actividad01.dto.VentaRequestDTO;
 import com.example.Actividad01.dto.VentaResponseDTO;
+import com.example.Actividad01.enums.EstadoVenta;
 import com.example.Actividad01.service.service.VentaService;
 import jakarta.validation.Valid;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -52,5 +56,16 @@ public class VentaController {
     @PatchMapping("/{id}/anular")
     public ResponseEntity<VentaResponseDTO> anular(@PathVariable Long id) {
         return ResponseEntity.ok(ventaService.anular(id));
+    }
+    @GetMapping("/buscar")
+    public ResponseEntity<List<VentaResponseDTO>> buscarVentas(
+            @RequestParam(required = false) Long clienteId,
+            @RequestParam(required = false) EstadoVenta estado,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
+            @RequestParam(required = false, defaultValue = "fecha") String ordenarPor,
+            @RequestParam(required = false, defaultValue = "DESC") String direccion) {
+
+        return ResponseEntity.ok(ventaService.buscarVentas(clienteId, estado, desde, hasta, ordenarPor, direccion));
     }
 }

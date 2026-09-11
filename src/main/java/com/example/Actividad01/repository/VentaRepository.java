@@ -1,5 +1,7 @@
 package com.example.Actividad01.repository;
 
+import com.example.Actividad01.dto.reporte.ProductoMasVendidoDTO;
+import com.example.Actividad01.dto.reporte.VentaPorCategoriaDTO;
 import com.example.Actividad01.entity.Venta;
 import com.example.Actividad01.enums.EstadoVenta;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -27,6 +29,45 @@ public interface VentaRepository extends JpaRepository<Venta, Long> {
             @Param("desde") LocalDateTime desde,
             @Param("hasta") LocalDateTime hasta,
             Sort sort);
+    @Query("""
+            select new com.example.Actividad01.dto.reporte.VentaPorCategoriaDTO(
+                       cat.id,
+                       cat.nombre,
+                       sum(d.cantidad),
+                       sum(d.subtotal))
+            from DetalleVenta d
+            join d.venta v
+            join d.producto p
+            join p.categoria cat
+            where v.estado = com.example.Actividad01.enums.EstadoVenta.REGISTRADA
+              and (:desde is null or v.fecha >= :desde)
+              and (:hasta is null or v.fecha <= :hasta)
+            group by cat.id, cat.nombre
+            order by sum(d.subtotal) desc
+            """)
+    List<VentaPorCategoriaDTO> reporteVentasPorCategoria(
+            @Param("desde") LocalDateTime desde,
+            @Param("hasta") LocalDateTime hasta);
 
+    @Query("""
+            select new com.example.Actividad01.dto.reporte.ProductoMasVendidoDTO(
+                       p.id,
+                       p.nombre,
+                       cat.nombre,
+                       sum(d.cantidad),
+                       sum(d.subtotal))
+            from DetalleVenta d
+            join d.venta v
+            join d.producto p
+            join p.categoria cat
+            where v.estado = com.example.Actividad01.enums.EstadoVenta.REGISTRADA
+              and (:desde is null or v.fecha >= :desde)
+              and (:hasta is null or v.fecha <= :hasta)
+            group by p.id, p.nombre, cat.nombre
+            order by sum(d.cantidad) desc
+            """)
+    List<ProductoMasVendidoDTO> reporteProductosMasVendidos(
+            @Param("desde") LocalDateTime desde,
+            @Param("hasta") LocalDateTime hasta);
 
 }
