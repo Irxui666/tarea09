@@ -13,11 +13,30 @@ export const routes: Routes = [
       },
       {
         path: 'categorias',
-        loadChildren: () => import('./features/categorias/categorias.routes').then(m => m.CATEGORIAS_ROUTES),
+        loadChildren: () =>
+          import('./features/categorias/categorias.routes').then((m) => m.CATEGORIAS_ROUTES),
       },
       {
         path: 'clientes',
-        loadChildren: () => import('./features/clientes/clientes.routes').then(m => m.CLIENTES_ROUTES),
+        loadChildren: () =>
+          import('./features/clientes/clientes.routes').then((m) => m.CLIENTES_ROUTES),
+      },
+      {
+        path: 'productos',
+        loadChildren: () =>
+          import('./features/productos/productos.routes').then((m) => m.PRODUCTOS_ROUTES),
+      },
+      {
+        path: 'ventas',
+        loadChildren: () => import('./features/ventas/ventas.routes').then((m) => m.VENTAS_ROUTES),
+      },
+      {
+        path: 'reportes',
+        title: 'Ventas por categoría',
+        loadComponent: () =>
+          import('./features/reportes/pages/reporte-categorias/reporte-categorias').then(
+            (m) => m.ReporteCategorias,
+          ),
       },
     ],
   },
