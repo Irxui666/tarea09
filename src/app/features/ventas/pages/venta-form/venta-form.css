@@ -1,0 +1,65 @@
+.resultados {
+  list-style: none;
+  padding: 6px;
+  margin: 8px 0 18px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+}
+.resultados button {
+  width: 100%;
+  display: flex;
+  gap: 8px 16px;
+  flex-wrap: wrap;
+  align-items: center;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  padding: 12px;
+  cursor: pointer;
+  font: inherit;
+}
+.resultados button:hover {
+  background: #eef2f8;
+}
+.resultados span,
+.dato {
+  color: #4b5563;
+  font-size: 14px;
+}
+.dato,
+.field-error {
+  display: block;
+  margin-top: 6px;
+}
+.elegido {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+}
+.cantidad {
+  width: 100px;
+}
+.detalle {
+  margin-top: 18px;
+  min-width: 620px;
+}
+.confirmacion {
+  border: 2px solid #64748b;
+}
+.actions {
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.oculto {
+  display: none;
+}
