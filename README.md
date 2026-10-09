@@ -1,33 +1,52 @@
-# PharmaSoft — Semana 7
+# PharmaSoft — Semana 09
 
-Frontend Angular adaptado al backend `../tarea05` (Java 21, Spring Boot y Oracle).
+Frontend Angular conectado al backend `../tarea05`, dentro de `C:\UNIVERSIDAD\LP2\SEMANA9`. No ejecutar la copia de SEMANA5.
 
-## Ejecutar
+## Ejecutar con Oracle
 
-1. Iniciar Oracle. Revisar la conexión en `tarea05/src/main/resources/application-dev.yaml`: `localhost:1522/freepdb1`, esquema `ACTIVIDAD01`.
-2. Ejecutar `Actividad01Application` desde el IDE con Java 21, o `mvnw.cmd spring-boot:run` dentro de tarea05. La API utiliza el puerto 8080.
-3. Dentro de este frontend ejecutar `npm.cmd install` si faltan dependencias y `npm.cmd start`.
-4. Abrir http://localhost:4200.
+1. Iniciar Oracle en `localhost:1522/freepdb1`. Revisar el esquema en `tarea05/src/main/resources/application-dev.yaml`.
+2. Abrir tarea05 de SEMANA9 en IntelliJ, recargar Maven y ejecutar `Actividad01Application` con Java 21. Alternativa: `mvnw.cmd spring-boot:run`.
+3. Verificar http://localhost:8080/swagger-ui.html.
+4. En este frontend, ejecutar `npm.cmd install` si faltan dependencias y `npm.cmd start`.
+5. Abrir http://localhost:4200. El proxy redirige `/api/**` al backend en 8080.
 
-El proxy de desarrollo redirige `/api/**` al puerto 8080. Solo debe haber un backend utilizando ese puerto.
+## Semana 09
 
-## Alcance de la semana 7
+- Productos: catálogo con categoría, precio, stock, estado, altas, edición, búsqueda y eliminación.
+- Ventas: buscadores por nombre/DNI/categoría sin distinguir tildes; solo clientes activos y productos activos con stock.
+- FormArray de detalle, cantidades enteras positivas, subtotales y total estimado con signals, validación de stock y acumulación de productos repetidos.
+- Revisión y confirmación separadas. Volver no registra. El POST contiene solo clienteId, productoId y cantidad.
+- Comprobante con total definitivo del servidor, DNI, estado y sello ANULADA. Impresión opcional al registrar y desde la consulta.
+- Consulta con cliente, estado y fechas, validación del rango, paginación del servidor y total registrado de la página sin anuladas.
+- Reporte de ventas por categoría con rango de fechas, unidades y montos; excluye anuladas e incluye impresión.
 
-- Inicio, layout y navegación PharmaSoft.
-- Categorías: listar, buscar por nombre, crear, editar y eliminar.
-- Clientes: listar, buscar por DNI/nombre/correo, crear, editar y eliminar.
-- Formularios reactivos, mensajes de validación, estados de carga y errores del servidor.
-- Rutas diferidas y separación de listados, formularios, modelos y servicios.
+Categorías y Clientes mantienen sus operaciones de la semana 07.
 
-Los servicios consumen `/api/v1/categorias` y `/api/v1/clientes`: GET/POST en la colección y GET/PUT/DELETE por identificador. Las listas son arrays. Clientes requiere DNI de 8 dígitos, nombres y apellidos de 2–100 caracteres y correo válido. Teléfono es opcional y, si se introduce, debe tener 9 dígitos; los campos opcionales vacíos se envían como null.
+## Contratos de tarea05
 
-Los duplicados y las eliminaciones con registros asociados devuelven 409; los datos inválidos, 400; los identificadores inexistentes, 404. La eliminación correcta devuelve 204. Productos y Ventas permanecen disponibles en el backend, fuera del alcance de esta interfaz de semana 7.
+Clientes, Categorías y Productos devuelven arrays. GET `/api/v1/ventas/buscar` devuelve ahora una página con `contenido`, `pagina`, `tamanio`, `totalElementos`, `totalPaginas`, `primera` y `ultima`. Acepta pagina/tamanio, clienteId, estado, desde/hasta, ordenarPor/direccion. GET `/api/v1/ventas` mantiene el array original.
 
-## Comprobación
+El stock de venta se descuenta mediante un UPDATE condicional en una transacción. Si falla una línea, se revierte toda la venta y el stock. La anulación bloquea la venta y devuelve stock una sola vez. Las pruebas simultáneas verifican que dos cajas no venden las mismas últimas unidades.
 
-Ejecutar `npm.cmd run build` y `npm.cmd test -- --watch=false`.
-En tarea05, `mvnw.cmd -Dtest=CategoriaServiceRulesTest test` comprueba las reglas de categorías sin conectarse a Oracle. La prueba de contexto original sí requiere la base de datos configurada.
+## Comprobación automática
 
-Con Oracle y la API iniciados, comprobar altas, edición, búsqueda, cancelación de eliminación, duplicados y eliminación de una categoría con productos asociados. Confirmar que los cambios permanecen al recargar la página.
+Frontend:
 
-El PDF anterior de Historia Clínica corresponde a otra versión y debe sustituirse antes de entregar la documentación de PharmaSoft.
+```powershell
+npm.cmd run build
+npm.cmd test -- --watch=false
+```
+
+Backend:
+
+```powershell
+.\mvnw.cmd test
+```
+
+Las pruebas del backend usan el perfil test con H2 en memoria, sin modificar Oracle. Cubren arranque, categorías, cálculo de venta, stock, rollback, concurrencia, filtros, paginación, anulación y reportes.
+
+## Evidencias y entrega
+
+Consultar `docs/SEMANA09_PRUEBAS.md` para las 17 pruebas del PDF y el reporte autónomo. Usar F12 → Red para capturar método, URL y estado HTTP cuando corresponda. Las pruebas de impresión requieren revisar la vista previa del navegador: sin menú/botones, con DNI/pie, estado ANULADA y filtros/total de página.
+
+El informe de semana 07 es una entrega distinta. Las capturas de semana 09 se identifican como pruebas con H2 temporal; repetirlas con Oracle para acreditar persistencia en la base del curso.
