@@ -58,14 +58,16 @@ public class VentaController {
         return ResponseEntity.ok(ventaService.anular(id));
     }
     @GetMapping("/buscar")
-    public ResponseEntity<List<VentaResponseDTO>> buscarVentas(
+    public ResponseEntity<com.example.Actividad01.dto.PaginaResponseDTO<VentaResponseDTO>> buscarVentas(
             @RequestParam(required = false) Long clienteId,
             @RequestParam(required = false) EstadoVenta estado,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
             @RequestParam(required = false, defaultValue = "fecha") String ordenarPor,
-            @RequestParam(required = false, defaultValue = "DESC") String direccion) {
+            @RequestParam(required = false, defaultValue = "DESC") String direccion,
+            @RequestParam(defaultValue = "0") int pagina,
+            @RequestParam(defaultValue = "10") int tamanio) {
 
-        return ResponseEntity.ok(ventaService.buscarVentas(clienteId, estado, desde, hasta, ordenarPor, direccion));
+        return ResponseEntity.ok(ventaService.buscarPagina(clienteId, estado, desde, hasta, ordenarPor, direccion, pagina, tamanio));
     }
 }

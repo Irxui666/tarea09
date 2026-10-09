@@ -67,7 +67,12 @@ public class VentaServiceImpl implements VentaService {
 
         BigDecimal total = BigDecimal.ZERO;
 
-        for (DetalleVentaRequestDTO item : request.getDetalles()) {
+        if (request.getDetalles().stream().map(DetalleVentaRequestDTO::getProductoId).distinct().count() != request.getDetalles().size()) {
+            throw new ReglaNegocioException("Un producto no puede repetirse en el detalle");
+        }
+        // El orden uniforme reduce el riesgo de interbloqueos entre cajas.
+        for (DetalleVentaRequestDTO item : request.getDetalles().stream()
+                .sorted(java.util.Comparator.comparing(DetalleVentaRequestDTO::getProductoId)).toList()) {
             Producto producto = productoRepository.findById(item.getProductoId()).orElseThrow(() ->
                     new RecursosNoEncontradoException("Producto no encontrado con id: " + item.getProductoId()));
 
@@ -75,9 +80,9 @@ public class VentaServiceImpl implements VentaService {
                 throw new ReglaNegocioException("El producto " + producto.getNombre() + " se encuentra inactivo");
             }
 
-            if (producto.getStock() < item.getCantidad()) {
-                throw new ReglaNegocioException("Stock insuficiente para " + producto.getNombre() + ". Disponible: " + producto.getStock()
-                        + ", solicitado: " + item.getCantidad());
+            if (productoRepository.descontarStock(producto.getId(), item.getCantidad()) != 1) {
+                throw new ReglaNegocioException("Stock insuficiente o producto inactivo: " + producto.getNombre()
+                        + ". Actualice los productos e intente nuevamente.");
             }
 
             BigDecimal subtotal = producto.getPrecio().multiply(BigDecimal.valueOf(item.getCantidad()));
@@ -93,7 +98,6 @@ public class VentaServiceImpl implements VentaService {
 
             total = total.add(subtotal);
 
-            producto.setStock(producto.getStock() - item.getCantidad());
         }
 
         venta.setTotal(total);
@@ -174,7 +178,7 @@ public class VentaServiceImpl implements VentaService {
     @Override
     @Transactional
     public VentaResponseDTO anular(Long id) {
-        Venta venta = ventaRepository.findById(id)
+        Venta venta = ventaRepository.bloquearPorId(id)
                 .orElseThrow(() -> new RecursosNoEncontradoException(
                         "Venta no encontrada con el id: " + id));
         if (venta.getEstado() == EstadoVenta.ANULADA) {
@@ -185,11 +189,29 @@ public class VentaServiceImpl implements VentaService {
         venta.setEstado(EstadoVenta.ANULADA);
         for (DetalleVenta detalle : venta.getDetalles()) {
             Producto producto = detalle.getProducto();
-            producto.setStock(producto.getStock() + detalle.getCantidad());
-            productoRepository.save(producto);
+            productoRepository.devolverStock(producto.getId(), detalle.getCantidad());
         }
         Venta ventaAnulada = ventaRepository.save(venta);
         return convertirResponse(ventaAnulada);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public com.example.Actividad01.dto.PaginaResponseDTO<VentaResponseDTO> buscarPagina(
+            Long clienteId, EstadoVenta estado, LocalDate desde, LocalDate hasta,
+            String ordenarPor, String direccion, int pagina, int tamanio) {
+        if (desde != null && hasta != null && desde.isAfter(hasta)) {
+            throw new ReglaNegocioException("La fecha desde no puede ser posterior a hasta");
+        }
+        if (pagina < 0 || tamanio < 1 || tamanio > 100) {
+            throw new ReglaNegocioException("Página o tamaño inválido; el tamaño debe estar entre 1 y 100");
+        }
+        var pageable = org.springframework.data.domain.PageRequest.of(pagina, tamanio,
+                construirSort(ordenarPor, direccion).and(Sort.by("id").descending()));
+        var resultado = ventaRepository.buscarPagina(clienteId, estado,
+                desde == null ? null : desde.atStartOfDay(),
+                hasta == null ? null : hasta.atTime(LocalTime.MAX), pageable);
+        return com.example.Actividad01.dto.PaginaResponseDTO.from(resultado.map(this::convertirResponse));
     }
 
     private Sort construirSort(String ordenarPor, String direccion) {

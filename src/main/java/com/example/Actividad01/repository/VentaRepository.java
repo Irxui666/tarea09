@@ -12,6 +12,21 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface VentaRepository extends JpaRepository<Venta, Long> {
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("select v from Venta v where v.id = :id")
+    java.util.Optional<Venta> bloquearPorId(@Param("id") Long id);
+
+    @Query("""
+            select v from Venta v
+            where (:clienteId is null or v.cliente.id = :clienteId)
+              and (:estado is null or v.estado = :estado)
+              and (:desde is null or v.fecha >= :desde)
+              and (:hasta is null or v.fecha <= :hasta)
+            """)
+    org.springframework.data.domain.Page<Venta> buscarPagina(
+            @Param("clienteId") Long clienteId, @Param("estado") EstadoVenta estado,
+            @Param("desde") LocalDateTime desde, @Param("hasta") LocalDateTime hasta,
+            org.springframework.data.domain.Pageable pageable);
     @Query("""
             select distinct v
             from Venta v
