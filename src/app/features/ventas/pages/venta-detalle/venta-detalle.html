@@ -1,0 +1,94 @@
+@if (nueva() === '1' && venta()) {
+  <div class="exito no-imprimir" role="status">Venta registrada correctamente.</div>
+}
+@if (error()) {
+  <div class="alerta" role="alert">
+    {{ error() }} <button class="btn no-imprimir" (click)="cargar()">Reintentar</button>
+  </div>
+}
+@if (cargando()) {
+  <p role="status">Cargando comprobante…</p>
+}
+@if (venta(); as v) {
+  <article class="card comprobante">
+    <header class="negocio">
+      <div>
+        <strong>PharmaSoft</strong>
+        <p>Botica · Sistema de ventas</p>
+      </div>
+      <div>
+        <h2>Comprobante de venta</h2>
+        <strong>N.º {{ numero() }}</strong>
+      </div>
+    </header>
+    <dl class="datos">
+      <div>
+        <dt>Fecha</dt>
+        <dd>{{ v.fecha | date: 'dd/MM/yyyy HH:mm' }}</dd>
+      </div>
+      <div>
+        <dt>Cliente</dt>
+        <dd>{{ v.clienteNombre }}</dd>
+      </div>
+      @if (cliente(); as c) {
+        <div>
+          <dt>DNI</dt>
+          <dd>{{ c.dni }}</dd>
+        </div>
+      }
+      <div>
+        <dt>Estado</dt>
+        <dd>{{ v.estado }}</dd>
+      </div>
+    </dl>
+    @if (v.estado === 'ANULADA') {
+      <p class="sello">ANULADA</p>
+    }
+    <div class="table-wrap">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Precio</th>
+            <th>Cantidad</th>
+            <th>Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (d of v.detalles; track $index) {
+            <tr>
+              <td>{{ d.productoNombre }}</td>
+              <td class="monto">{{ d.precio | currency: 'PEN' : 'S/ ' }}</td>
+              <td>{{ d.cantidad }}</td>
+              <td class="monto">{{ d.subtotal | currency: 'PEN' : 'S/ ' }}</td>
+            </tr>
+          }
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="2">
+              {{ v.detalles.length }} {{ v.detalles.length === 1 ? 'producto' : 'productos' }} ·
+              {{ unidades() }} {{ unidades() === 1 ? 'unidad' : 'unidades' }}
+            </td>
+            <td><strong>Total</strong></td>
+            <td class="monto">
+              <strong>{{ v.total | currency: 'PEN' : 'S/ ' }}</strong>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    <footer class="solo-impresion pie">
+      <p>Gracias por su compra.</p>
+      <p>
+        Documento interno sin valor tributario · Impreso el
+        {{ fechaImpresion() | date: 'dd/MM/yyyy HH:mm' }}
+      </p>
+    </footer>
+    <div class="actions no-imprimir">
+      <a class="btn" routerLink="/ventas">Volver a la consulta</a
+      ><a class="btn" routerLink="/ventas/nueva">Nueva venta</a
+      ><button class="btn btn-primary" (click)="imprimirComprobante()">Imprimir comprobante</button>
+    </div>
+  </article>
+}

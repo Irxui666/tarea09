@@ -223,3 +223,21 @@ textarea:focus-visible {
 
 .form-fields {border:0;padding:0;margin:0;min-width:0}
 .area-main {min-width:0}
+.monto {text-align:right;white-space:nowrap}
+.paginador {align-items:center;justify-content:flex-end}
+.solo-impresion {display:none}
+@media print {
+  @page {size:A4;margin:12mm}
+  * {-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body {background:#fff;color:#000}
+  .no-imprimir {display:none !important}
+  .solo-impresion {display:block}
+  .card {box-shadow:none;border-radius:0;padding:0}
+  .table-wrap {overflow:visible}
+  .tabla {border-radius:0;width:100%;font-size:10pt}
+  .tabla th {background:#fff;color:#000;border-bottom:2px solid #444}
+  .tabla td {overflow-wrap:normal;max-width:none}
+  .tabla tr {break-inside:avoid}
+  .tabla thead {display:table-header-group}
+  .tabla tfoot {display:table-row-group}
+}

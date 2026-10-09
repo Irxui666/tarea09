@@ -1,0 +1,55 @@
+.comprobante {
+  max-width: 900px;
+  position: relative;
+}
+.negocio {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  border-bottom: 2px solid #64748b;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  flex-wrap: wrap;
+}
+.negocio strong {
+  font-size: 22px;
+}
+.negocio p {
+  color: #4b5563;
+}
+.datos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+}
+.datos dt {
+  color: #4b5563;
+  font-size: 13px;
+}
+.datos dd {
+  margin: 6px 0;
+  font-weight: 600;
+}
+.sello {
+  font-size: 32px;
+  font-weight: bold;
+  color: #b42318;
+  letter-spacing: 4px;
+  border: 2px solid currentColor;
+  padding: 10px;
+  text-align: center;
+}
+.pie {
+  text-align: center;
+  font-size: 12px;
+  margin-top: 24px;
+}
+.actions {
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+@media print {
+  .comprobante {
+    max-width: none;
+  }
+}
