@@ -1,52 +1,33 @@
-# Historia Clínica — frontend Angular
+# PharmaSoft — Semana 7
 
-Frontend adaptado al backend `../HistoriaClinica` (Java 21 y Spring Boot).
+Frontend Angular adaptado al backend `../tarea05` (Java 21, Spring Boot y Oracle).
 
 ## Ejecutar
 
-1. Iniciar Oracle y verificar `HistoriaClinica/src/main/resources/application-dev.yaml`. La conexión actual utiliza `localhost:1522/freepdb1`.
-2. Desde `HistoriaClinica`, ejecutar `./mvnw.cmd spring-boot:run` en Windows o `mvn spring-boot:run` si Maven está instalado. La API escucha en el puerto 8080. Si falla el wrapper, ejecutar desde el IDE con Java 21 o una instalación de Maven.
-3. Desde esta carpeta, ejecutar:
-
-```powershell
-npm install
-npm start
-```
-
+1. Iniciar Oracle. Revisar la conexión en `tarea05/src/main/resources/application-dev.yaml`: `localhost:1522/freepdb1`, esquema `ACTIVIDAD01`.
+2. Ejecutar `Actividad01Application` desde el IDE con Java 21, o `mvnw.cmd spring-boot:run` dentro de tarea05. La API utiliza el puerto 8080.
+3. Dentro de este frontend ejecutar `npm.cmd install` si faltan dependencias y `npm.cmd start`.
 4. Abrir http://localhost:4200.
 
-## Módulos
+El proxy de desarrollo redirige `/api/**` al puerto 8080. Solo debe haber un backend utilizando ese puerto.
 
-- Especialidades: crear, editar y desactivar.
-- Procedimientos: código, nombre, tarifa, duración y especialidad.
-- Pacientes: DNI, datos personales, contacto y estado.
-- Atenciones: registrar varios procedimientos; consultar por paciente, estado y fechas; ordenar, ver detalles y anular.
-- Reportes: actividad por especialidad y procedimientos más realizados; excluyen atenciones anuladas.
+## Alcance de la semana 7
 
-Registrar primero las especialidades, los procedimientos y los pacientes. Las nuevas atenciones requieren pacientes y procedimientos activos. El servidor calcula las tarifas y los totales. Desactivar conserva los registros y el historial.
+- Inicio, layout y navegación PharmaSoft.
+- Categorías: listar, buscar por nombre, crear, editar y eliminar.
+- Clientes: listar, buscar por DNI/nombre/correo, crear, editar y eliminar.
+- Formularios reactivos, mensajes de validación, estados de carga y errores del servidor.
+- Rutas diferidas y separación de listados, formularios, modelos y servicios.
 
-## Conexión con la API
+Los servicios consumen `/api/v1/categorias` y `/api/v1/clientes`: GET/POST en la colección y GET/PUT/DELETE por identificador. Las listas son arrays. Clientes requiere DNI de 8 dígitos, nombres y apellidos de 2–100 caracteres y correo válido. Teléfono es opcional y, si se introduce, debe tener 9 dígitos; los campos opcionales vacíos se envían como null.
 
-En desarrollo, `environment.development.ts` usa `/api/v1`; `proxy.conf.json` reenvía las solicitudes a `http://localhost:8080`. Reiniciar `npm start` después de modificar el proxy.
+Los duplicados y las eliminaciones con registros asociados devuelven 409; los datos inválidos, 400; los identificadores inexistentes, 404. La eliminación correcta devuelve 204. Productos y Ventas permanecen disponibles en el backend, fuera del alcance de esta interfaz de semana 7.
 
-En producción, ajustar `src/environments/environment.ts` al servidor de destino. CORS admite `http://localhost:4200` y `http://127.0.0.1:4200`; añadir el origen del despliegue en `WebConfig.java` si corresponde.
+## Comprobación
 
-| Recurso                                          | Operaciones                                              |
-| ------------------------------------------------ | -------------------------------------------------------- |
-| `/api/v1/pacientes`                              | GET, POST; GET/PUT/DELETE `/{id}`; GET `/dni/{dni}`      |
-| `/api/v1/especialidades`                         | GET, POST; GET/PUT/DELETE `/{id}`                        |
-| `/api/v1/procedimientos`                         | GET, POST; GET/PUT/DELETE `/{id}`                        |
-| `/api/v1/atenciones`                             | GET con filtros, POST; GET `/{id}`; PATCH `/{id}/anular` |
-| `/api/v1/reportes/atenciones-por-especialidad`   | GET con `desde` y `hasta` opcionales                     |
-| `/api/v1/reportes/procedimientos-mas-realizados` | GET con `desde` y `hasta` opcionales                     |
+Ejecutar `npm.cmd run build` y `npm.cmd test -- --watch=false`.
+En tarea05, `mvnw.cmd -Dtest=CategoriaServiceRulesTest test` comprueba las reglas de categorías sin conectarse a Oracle. La prueba de contexto original sí requiere la base de datos configurada.
 
-DELETE desactiva los catálogos y pacientes. Las fechas usan `yyyy-MM-dd` e incluyen todo el día final. Atenciones acepta `pacienteId`, `estado`, `desde`, `hasta`, `ordenarPor` (`fecha`, `id`, `total`, `estado`) y `direccion` (`asc`, `desc`).
+Con Oracle y la API iniciados, comprobar altas, edición, búsqueda, cancelación de eliminación, duplicados y eliminación de una categoría con productos asociados. Confirmar que los cambios permanecen al recargar la página.
 
-## Verificar
-
-```powershell
-npm run build
-npm test -- --watch=false
-```
-
-Desde `HistoriaClinica`, `mvn test` ejecuta las pruebas con H2 en memoria: no requiere Oracle ni modifica la base de desarrollo. La integración recorre creación de catálogos, registro de paciente y atención, filtros, reportes, validación, anulación y desactivación.
+El PDF anterior de Historia Clínica corresponde a otra versión y debe sustituirse antes de entregar la documentación de PharmaSoft.

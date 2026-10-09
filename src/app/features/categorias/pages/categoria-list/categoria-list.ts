@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { mensajeError } from '../../../../core/utils/http-error';
 import { Categoria } from '../../models/categoria.model';
 import { CategoriaService } from '../../services/categoria-service';
@@ -13,10 +13,13 @@ import { CategoriaService } from '../../services/categoria-service';
 })
 export class CategoriaList implements OnInit {
   private readonly categoriaService = inject(CategoriaService);
+  private readonly route = inject(ActivatedRoute);
 
   protected readonly categorias = signal<Categoria[]>([]);
   protected readonly cargando = signal(false);
   protected readonly error = signal<string | null>(null);
+  protected readonly exito = signal('');
+  protected readonly eliminando = signal(false);
   protected readonly filtro = signal('');
 
   protected readonly filtradas = computed(() => {
@@ -27,6 +30,7 @@ export class CategoriaList implements OnInit {
   });
 
   ngOnInit(): void {
+    if (this.route.snapshot.queryParamMap.has('guardado')) this.exito.set('Categoría guardada correctamente.');
     this.cargar();
   }
 
@@ -51,13 +55,14 @@ export class CategoriaList implements OnInit {
       return;
     }
 
+    this.eliminando.set(true); this.error.set(null); this.exito.set('');
     this.categoriaService.eliminar(categoria.id).subscribe({
-      next: () =>
+      next: () => {
         this.categorias.update(lista =>
           lista.filter(c => c.id !== categoria.id)
-        ),
-      error: (err: HttpErrorResponse) =>
-        this.error.set(mensajeError(err)),
+        ); this.eliminando.set(false); this.exito.set('Categoría eliminada correctamente.'); },
+      error: (err: HttpErrorResponse) => {
+        this.eliminando.set(false); this.error.set(mensajeError(err)); },
     });
   }
 }

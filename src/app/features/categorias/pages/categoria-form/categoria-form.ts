@@ -20,11 +20,13 @@ export class CategoriaForm implements OnInit {
   readonly id = input<string>();
 
   protected readonly guardando = signal(false);
+  protected readonly cargando = signal(false);
+  protected readonly cargaFallida = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly erroresServidor = signal<Record<string, string>>({});
 
   protected readonly form = this.fb.group({
-    nombre: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
+    nombre: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50), Validators.pattern(/.*\S.*/)]],
     descripcion: ['', [Validators.maxLength(200)]],
     estado: [true],
   });
@@ -37,18 +39,21 @@ export class CategoriaForm implements OnInit {
     const id = this.id();
 
     if (id) {
+      this.cargando.set(true);
       this.categoriaService.obtener(Number(id)).subscribe({
-        next: c => this.form.setValue({
+        next: c => { this.form.setValue({
           nombre: c.nombre,
           descripcion: c.descripcion ?? '',
           estado: c.estado,
-        }),
-        error: (err: HttpErrorResponse) => this.error.set(mensajeError(err)),
+        }); this.cargando.set(false); },
+        error: (err: HttpErrorResponse) => { this.cargando.set(false); this.cargaFallida.set(true); this.error.set(mensajeError(err)); },
       });
     }
   }
 
   guardar(): void {
+    if (this.guardando() || this.cargando() || this.cargaFallida()) return;
+    this.form.controls.nombre.setValue(this.form.controls.nombre.value.trim());
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -69,9 +74,11 @@ export class CategoriaForm implements OnInit {
       : this.categoriaService.crear(dto);
 
     this.guardando.set(true);
+    this.error.set(null);
+    this.erroresServidor.set({});
 
     peticion.subscribe({
-      next: () => this.router.navigate(['/categorias']),
+      next: () => this.router.navigate(['/categorias'], { queryParams: { guardado: 1 } }),
       error: (err: HttpErrorResponse) => {
         this.guardando.set(false);
         this.error.set(mensajeError(err));

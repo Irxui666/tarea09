@@ -5,7 +5,9 @@
     <div class="alerta">{{ error() }}</div>
   }
 
+  @if (cargando()) { <p role="status">Cargando categoría…</p> }
   <form [formGroup]="form" (ngSubmit)="guardar()" class="card formulario">
+    <fieldset class="form-fields" [disabled]="guardando() || cargando() || cargaFallida()">
     <label>
       Nombre
       <input class="input" formControlName="nombre" />
@@ -39,10 +41,11 @@
       Activo
     </label>
 
+    </fieldset>
     <div class="acciones">
       <a routerLink="/categorias" class="btn">Cancelar</a>
 
-      <button type="submit" class="btn btn-primary" [disabled]="guardando()">
+      <button type="submit" class="btn btn-primary" [disabled]="guardando() || cargando() || cargaFallida()">
         {{ guardando() ? 'Guardando…' : (esEdicion() ? 'Actualizar' : 'Registrar') }}
       </button>
     </div>

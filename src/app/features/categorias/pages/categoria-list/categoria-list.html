@@ -12,13 +12,14 @@
   />
 
   @if (error()) {
-    <div class="alerta">{{ error() }}</div>
+    <div class="alerta" role="alert">{{ error() }} <button class="btn" (click)="cargar()">Reintentar</button></div>
   }
+  @if (exito()) { <div class="exito" role="status">{{ exito() }}</div> }
 
   @if (cargando()) {
     <p>Cargando categorías…</p>
   } @else {
-    <table class="tabla">
+    <div class="table-wrap"><table class="tabla">
       <thead>
         <tr>
           <th>ID</th>
@@ -42,7 +43,7 @@
             </td>
             <td class="acciones">
               <a [routerLink]="[c.id, 'editar']" class="btn">Editar</a>
-              <button type="button" class="btn btn-peligro" (click)="eliminar(c)">
+              <button type="button" class="btn btn-peligro" (click)="eliminar(c)" [disabled]="eliminando()">
                 Eliminar
               </button>
             </td>
@@ -53,6 +54,6 @@
           </tr>
         }
       </tbody>
-    </table>
+    </table></div>
   }
 </section>

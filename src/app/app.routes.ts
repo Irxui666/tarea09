@@ -8,26 +8,17 @@ export const routes: Routes = [
       { path: '', pathMatch: 'full', redirectTo: 'inicio' },
       {
         path: 'inicio',
-        title: 'Historia Clínica',
+        title: 'PharmaSoft',
         loadComponent: () => import('./features/inicio/inicio').then((m) => m.Inicio),
       },
-      ...['pacientes', 'especialidades', 'procedimientos'].map((recurso) => ({
-        path: recurso,
-        title: recurso[0].toUpperCase() + recurso.slice(1),
-        data: { recurso },
-        loadComponent: () => import('./features/clinica/catalogo').then((m) => m.Catalogo),
-      })),
       {
-        path: 'atenciones',
-        title: 'Atenciones',
-        loadComponent: () => import('./features/clinica/atenciones').then((m) => m.Atenciones),
+        path: 'categorias',
+        loadChildren: () => import('./features/categorias/categorias.routes').then(m => m.CATEGORIAS_ROUTES),
       },
       {
-        path: 'reportes',
-        title: 'Reportes',
-        loadComponent: () => import('./features/clinica/reportes').then((m) => m.Reportes),
+        path: 'clientes',
+        loadChildren: () => import('./features/clientes/clientes.routes').then(m => m.CLIENTES_ROUTES),
       },
-      { path: 'categorias', redirectTo: 'especialidades', pathMatch: 'full' },
     ],
   },
   {
