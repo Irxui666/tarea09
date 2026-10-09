@@ -1,0 +1,115 @@
+<div class="page-header">
+  <h2>{{ titulo }}</h2>
+  <button class="btn btn-primary" (click)="edit()" [disabled]="saving() || loading()">
+    Nuevo registro
+  </button>
+</div>
+@if (error()) {
+  <div class="alerta" role="alert">{{ error() }}</div>
+}
+@if (success()) {
+  <div class="exito" role="status">{{ success() }}</div>
+}
+@if (editing()) {
+  <form class="card" #form="ngForm" (ngSubmit)="save()">
+    <h3>{{ id ? 'Editar registro' : 'Nuevo registro' }}</h3>
+    <div class="form-grid">
+      @for (field of fields; track field.key) {
+        <label
+          >{{ field.label }} {{ field.required ? '*' : '' }}
+          @if (field.type === 'sexo') {
+            <select class="input" [name]="field.key" [(ngModel)]="model[field.key]" required>
+              <option value="" disabled>Seleccione</option>
+              <option value="M">Masculino</option>
+              <option value="F">Femenino</option>
+            </select>
+          } @else if (field.type === 'especialidad') {
+            <select class="input" [name]="field.key" [(ngModel)]="model[field.key]" required>
+              <option value="" disabled>Seleccione</option>
+              @for (e of especialidades(); track e.id) {
+                <option [ngValue]="e.id">{{ e.nombre }}{{ e.estado ? '' : ' (inactiva)' }}</option>
+              }
+            </select>
+          } @else {
+            <input
+              class="input"
+              [type]="field.type || 'text'"
+              [name]="field.key"
+              [(ngModel)]="model[field.key]"
+              [required]="!!field.required"
+              [attr.maxlength]="field.type !== 'number' ? field.max : null"
+              [min]="field.min ?? null"
+              [max]="
+                field.type === 'date' ? ayer : field.type === 'number' ? (field.max ?? null) : null
+              "
+              [step]="field.key === 'tarifa' ? '0.01' : '1'"
+              [pattern]="field.pattern || (field.required && !field.type ? '.*\\S.*' : '.*')"
+            />
+          }
+          @if (validation()[field.key]) {
+            <small class="field-error">{{ validation()[field.key] }}</small>
+          }
+        </label>
+      }
+      <label class="check"
+        ><input type="checkbox" name="estado" [(ngModel)]="model['estado']" /> Activo</label
+      >
+    </div>
+    <div class="actions">
+      <button class="btn btn-primary" type="submit" [disabled]="form.invalid || saving()">
+        {{ saving() ? 'Guardando…' : 'Guardar' }}</button
+      ><button class="btn" type="button" (click)="editing.set(false)" [disabled]="saving()">
+        Cancelar
+      </button>
+    </div>
+  </form>
+}
+<label class="search"
+  >Buscar
+  <input class="input" [(ngModel)]="search" placeholder="Escriba un nombre, documento o código"
+/></label>
+@if (loading()) {
+  <p role="status">Cargando…</p>
+} @else {
+  <div class="table-wrap">
+    <table class="tabla">
+      <thead>
+        <tr>
+          @for (f of fields; track f.key) {
+            <th>{{ f.label }}</th>
+          }
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of filtered(); track row.id) {
+          <tr>
+            @for (f of fields; track f.key) {
+              <td>{{ cell(row, f.key) }}</td>
+            }
+            <td>
+              <span class="badge" [class.inactivo]="!row.estado">{{
+                row.estado ? 'Activo' : 'Inactivo'
+              }}</span>
+            </td>
+            <td class="actions">
+              <button class="btn" (click)="edit(row)" [disabled]="saving()">Editar</button
+              ><button
+                class="btn btn-peligro"
+                (click)="deactivate(row)"
+                [disabled]="!row.estado || saving()"
+              >
+                Desactivar
+              </button>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td [attr.colspan]="fields.length + 2">No hay registros para mostrar.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
