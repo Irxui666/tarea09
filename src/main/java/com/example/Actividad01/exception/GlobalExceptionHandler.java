@@ -15,6 +15,15 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponseDTO> handleIntegrity(
+            org.springframework.dao.DataIntegrityViolationException ex,
+            HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponseDTO(
+                LocalDateTime.now(), HttpStatus.CONFLICT.value(), "Conflict",
+                "No se pudo completar la operación: existen datos duplicados o registros asociados",
+                request.getRequestURI(), null));
+    }
     @ExceptionHandler(RecursosNoEncontradoException.class)
     public ResponseEntity<ErrorResponseDTO> handlNotFound(
             RecursosNoEncontradoException ex,

@@ -6,6 +6,7 @@ import com.example.Actividad01.entity.Categoria;
 import com.example.Actividad01.exception.RecursosNoEncontradoException;
 import com.example.Actividad01.exception.ReglaNegocioException;
 import com.example.Actividad01.repository.CategoriaRepository;
+import com.example.Actividad01.repository.ProductoRepository;
 import com.example.Actividad01.service.service.CategoriaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,8 +19,10 @@ import java.util.Optional;
 public class CategoriaServiceImpl implements CategoriaService {
     private static final Logger LOG = LoggerFactory.getLogger(CategoriaServiceImpl.class);
     private final CategoriaRepository categoriaRepository;
-    public CategoriaServiceImpl (CategoriaRepository categoriaRepository){
+    private final ProductoRepository productoRepository;
+    public CategoriaServiceImpl (CategoriaRepository categoriaRepository, ProductoRepository productoRepository){
         this.categoriaRepository = categoriaRepository;
+        this.productoRepository = productoRepository;
     }
 
     @Override
@@ -47,7 +50,11 @@ public class CategoriaServiceImpl implements CategoriaService {
             new RecursosNoEncontradoException(
                     "Categoria no encontrada con id: "+ aLong
             ));
-        categoria.setNombre(t.getNombre());
+        String nombre = t.getNombre().trim();
+        if (categoriaRepository.existsByNombreIgnoreCaseAndIdNot(nombre, aLong)) {
+            throw new ReglaNegocioException("Ya existe una categoria con el nombre " + nombre);
+        }
+        categoria.setNombre(nombre);
         categoria.setDescripcion(t.getDescripcion());
         categoria.setEstado(t.getEstado());
         Categoria catActualizada = categoriaRepository.save(categoria);
@@ -72,6 +79,9 @@ public class CategoriaServiceImpl implements CategoriaService {
                 new RecursosNoEncontradoException(
                         "Categoria no encontrada con id: "+ aLong
                 ));
+        if (productoRepository.existsByCategoriaId(aLong)) {
+            throw new ReglaNegocioException("No se puede eliminar la categoria porque tiene productos asociados");
+        }
         categoriaRepository.delete(categoria);
     }
 

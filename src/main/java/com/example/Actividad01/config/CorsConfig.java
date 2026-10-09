@@ -9,8 +9,7 @@ public class CorsConfig implements WebMvcConfigurer {
     private final String[] origenes;
     public CorsConfig(
         @Value(
-                "${app.cors.allowed-origins: "
-                +"http://localhost:8080}") String[] origenes){
+                "${app.cors.allowed-origins:http://localhost:4200,http://127.0.0.1:4200}") String[] origenes){
         this.origenes = origenes;
     }
 
@@ -21,13 +20,13 @@ public class CorsConfig implements WebMvcConfigurer {
         registry.addMapping("/api/**")
                 .allowedOrigins(origenes)
                 .allowedMethods(
-                        "GET", "POST", "PUT", "DELETE", "OPTIONS"
+                        "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"
                 )
                 .allowedHeaders(
                         "Content-Type",
                         "Accept",
                         "Authorization",
-                        "Oring"
+                        "Origin"
                 )
                 .exposedHeaders("Location")
                 .allowCredentials(true)

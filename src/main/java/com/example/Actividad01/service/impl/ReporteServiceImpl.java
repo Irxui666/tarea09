@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+@Service
 public class ReporteServiceImpl implements ReporteService {
     private static final Logger log =
             LoggerFactory.getLogger(ReporteServiceImpl.class);
