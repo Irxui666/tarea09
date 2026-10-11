@@ -202,7 +202,6 @@ export class VentaForm implements OnInit {
         this.guardando.set(false);
         this.confirmando.set(false);
         this.error.set(mensajeError(e));
-        // Mantener el detalle, pero actualizar el stock que otra caja pudo consumir.
         this.productoService
           .listar()
           .subscribe({ next: (p) => this.productos.set(p), error: () => {} });
